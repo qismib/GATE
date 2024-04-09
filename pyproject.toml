@@ -11,7 +11,7 @@ python = "^3.11"
 numpy = "^1.26.4"
 matplotlib = "^3.8.4"
 noisyopt = "^0.2.2"
-qiskit = {extras = ["visualization"], version = "^1.0.2"}
+qiskit = "0.45"
 scipy = "^1.13.0"
 
 
