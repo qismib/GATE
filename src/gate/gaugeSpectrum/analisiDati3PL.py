@@ -9,7 +9,7 @@ DATA_PATH = "../../../data"
 
 d = 8
 x = 1.5
-leggiFile = False
+leggiFile = True
 metodi = ["VVQE"]
 
 

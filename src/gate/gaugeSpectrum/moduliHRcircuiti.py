@@ -6,6 +6,7 @@ from qiskit_aer.primitives import Estimator as AerEstimator
 from qiskit_aer.noise import NoiseModel
 import moduliHR as simCl
 from valoreAspettazionePauli import valoreAspettazioneOp as valoreAspPauli
+from valoreAspettazionePauli import mediaVarianzaOp as misuraValoreMedioVarianza
 
 
 #### Con circuiti quantistici
@@ -131,16 +132,16 @@ def funzioneCostoSuCircuito(
     qc = QuantumCircuit(qr, cr)
 
     preparaStatoReale(parametri, qc, qr)
-    energia = np.real(valoreAspPauli(hamiltoniana, qc))
-    # energia, varianza = misuraValoreMedioVarianza(hamiltoniana, qc) # misuraValoreMedioVarianza(qc, hamiltoniana, stimatore, ripetizioni)
+    # energia = np.real(valoreAspPauli(hamiltoniana, qc))
+    energia, varianza = misuraValoreMedioVarianza(hamiltoniana, qc) # misuraValoreMedioVarianza(qc, hamiltoniana, stimatore, ripetizioni)
     qc.clear()
 
-    costo = energia  # varianza
+    costo = varianza #energia
     for i in range(len(statiInferiori)):
         sovrapposizione = np.vdot(statiInferiori[i], stato)
         costo += soppressione * abs(sovrapposizione)
 
-    # stopMinimizzazione(stato, varianzaCl, costo, sogliaVar, soppressione)
+    stopMinimizzazione(stato, varianzaCl, costo, sogliaVar, soppressione)
 
     # print(_nCircuiti_, energia, varianza, stato, costo, soppressione)
     print(_nCircuiti_, energia, varianzaCl, stato, costo, soppressione)
@@ -268,7 +269,7 @@ def trovaTuttiAutostati(hamiltoniana, nStati, rumore):
     for i in range(nStati):
         stato = trovaAutostato(hamiltoniana, nStati, autostati, stimatore)
         autostati.append(stato)
-        simCl.salvaBackupStato("spettroGauge/backupMP.txt", stato)
+        simCl.salvaBackupStato("backupMP.txt", stato)
 
     return autostati
 

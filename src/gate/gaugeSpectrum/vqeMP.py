@@ -146,9 +146,9 @@ print(H)
 autovalori, autovettori = np.linalg.eigh(H)
 autovettori = np.transpose(autovettori)
 
-percorsoFile = "data/misureAutovaloriMP/"
+percorsoFile = "../../../data/misureAutovaloriMP/"
 if simulazioneQuantistica:
-    percorsoFile = "data/misureAutovaloriMPQ/"
+    percorsoFile = "../../../data/misureAutovaloriMPQ/"
 nomeFile = percorsoFile + "attesi_" + str(d) + ".txt"
 file = open(nomeFile, "w")
 for a in autovalori:
