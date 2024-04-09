@@ -1,49 +1,58 @@
-from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
 # Il transpiler non supporta la nuova versione dei backend (BackendV2), quindi bisogna usare quelli vecchi
-from qiskit.providers.fake_provider import FakeLagos
-from qiskit.primitives import BackendSampler
-from qiskit.providers.basicaer import QasmSimulatorPy
 from qiskit.compiler import transpile
-from qiskit.transpiler import Layout, TranspileLayout
 import numpy as np
-import matplotlib.pyplot as plt
-import math
 
 #### Funzioni utili
+
 
 def dizionarioInLista(res, statiAttesi):
     lista = [0 for s in statiAttesi]
 
     for stato, misura in res.items():
         if stato not in statiAttesi:
-            raise Exception("dizionarioInLista():", stato, "non è presente fra gli stati attesi", statiAttesi)
+            raise Exception(
+                "dizionarioInLista():",
+                stato,
+                "non è presente fra gli stati attesi",
+                statiAttesi,
+            )
         indice = statiAttesi.index(stato)
         lista[indice] = misura
 
     return lista
+
 
 ## test dizionarioInLista
 # statiAtt = ["00", "01", "10", "11"]
 # diz = {"01" : 5, "10" : 3, "00" : -1, "11" : 8}
 # print(dizionarioInLista(diz, statiAtt))
 
+
 def preparaStatoBaseComp(circuito, stato):
     nQubit = len(stato)
     if nQubit > circuito.num_qubits:
-        raise Exception("Non è possibile generare lo stato", stato, "perchè il circuito ha solo", circuito.num_qubits, "qubit")
-    
+        raise Exception(
+            "Non è possibile generare lo stato",
+            stato,
+            "perchè il circuito ha solo",
+            circuito.num_qubits,
+            "qubit",
+        )
+
     for j in range(len(stato)):
         bit = stato[j]
         i = len(stato) - j - 1
         if bit == "1":
             circuito.x(circuito.qubits[i])
-            #print("X sul qubit", i)
+            # print("X sul qubit", i)
         elif bit != "0":
             raise Exception(stato, "non è uno stato valido da generare")
+
 
 ## test preparaStatoBaseComp
 # qc = QuantumCircuit(4, 4)
 # preparaStatoBaseComp(qc, "0101")
+
 
 # misure[k][n]:
 # k: indice stato
@@ -70,12 +79,12 @@ def leggiMisureDaFile(prefissoFile, nStati, nPunti):
         for n in range(nPunti):
             s = file.readline()
             if s == "":
-                #print("Letta una linea vuota")
+                # print("Letta una linea vuota")
                 continue
             mis = float(s)
             misure[k].append(mis)
         file.close()
-    
+
     return misure
 
 
@@ -83,33 +92,49 @@ def sovrapposizione(stati, coefficienti):
     v = [0 for n in range(len(stati))]
     for n in range(len(stati)):
         v = np.add(v, np.multiply(stati[n], coefficienti[n]))
-    
+
     return v
 
 
 #### Ricalibrazione delle misure
 
-def matriceCalibrazioneErroriMisura(circuito, backend_sim, sampler, statiAttesi, ripetizioni = 10000):
+
+def matriceCalibrazioneErroriMisura(
+    circuito, backend_sim, sampler, statiAttesi, ripetizioni=10000
+):
     nQubit = circuito.num_qubits
     nStati = 2**nQubit
     if nStati != len(statiAttesi):
-        raise Exception("Il numero di stati attesi (", len(statiAttesi),") non coincide col numero di qubit presenti nel circuito (", nStati, ")", sep = "")
+        raise Exception(
+            "Il numero di stati attesi (",
+            len(statiAttesi),
+            ") non coincide col numero di qubit presenti nel circuito (",
+            nStati,
+            ")",
+            sep="",
+        )
     matriceCalibrazione = [[0 for m in range(nStati)] for n in range(nStati)]
 
     for n in range(nStati):
         preparaStatoBaseComp(circuito, statiAttesi[n])
-        circuito.measure_all(add_bits = False)
+        circuito.measure_all(add_bits=False)
 
-        circuitoTradotto = transpile(circuito, backend = backend_sim)
-        res = sampler.run(circuits = [circuitoTradotto], shots = ripetizioni).result().quasi_dists[0].binary_probabilities()
+        circuitoTradotto = transpile(circuito, backend=backend_sim)
+        res = (
+            sampler.run(circuits=[circuitoTradotto], shots=ripetizioni)
+            .result()
+            .quasi_dists[0]
+            .binary_probabilities()
+        )
         for stato, misura in res.items():
             indice = statiAttesi.index(stato)
             matriceCalibrazione[indice][n] = misura
 
         circuito.clear()
-    
+
     matriceCalibrazione = np.linalg.inv(matriceCalibrazione)
     return matriceCalibrazione
+
 
 #### Test calibrazione
 # nQubit = 2
@@ -165,9 +190,10 @@ def correggiErroreMisura(misure, mCal):
 
 #### Randomized compiling
 
+
 def cxCasuale(circuito, qubitControllo, qubitBersaglio):
     n = np.random.randint(16)
-    
+
     match n:
         case 0:
             circuito.cx(qubitControllo, qubitBersaglio)
@@ -251,13 +277,15 @@ def cxCasuale(circuito, qubitControllo, qubitBersaglio):
             circuito.z(qubitBersaglio)
         case _:
             print("Errore!")
-    
+
     return n
 
-#Ridefinizione dei cnot per zero-noise-extrapolation
+
+# Ridefinizione dei cnot per zero-noise-extrapolation
 def gruppoCx(circuito, qubitControllo, qubitBersaglio, numeroCx):
     for n in range(numeroCx):
         cxCasuale(circuito, qubitControllo, qubitBersaglio)
+
 
 # qr = QuantumRegister(2)
 # cr = ClassicalRegister(2)
@@ -272,12 +300,12 @@ def gruppoCx(circuito, qubitControllo, qubitBersaglio, numeroCx):
 #### Evoluzione temporale su hardware quantistico
 
 # def passoOtt(circuito, qr1, qr2, t, x, nCx):
-#     par = [-(x * t / 2), 
-#            -(3 * t / 8), 
-#            -(3 * x * t / 2), 
-#            -(9 * t / 4), 
-#            -(9 * t / 8), 
-#            -(3 * x * t), 
+#     par = [-(x * t / 2),
+#            -(3 * t / 8),
+#            -(3 * x * t / 2),
+#            -(9 * t / 4),
+#            -(9 * t / 8),
+#            -(3 * x * t),
 #            -(x * t)]
 
 #     circuito.ry(par[0], qr1)
@@ -304,10 +332,7 @@ def gruppoCx(circuito, qubitControllo, qubitBersaglio, numeroCx):
 def ciclo2Placchette(circuito, qr, t, x, nCx, c, d):
     qr1 = qr[0]
     qr2 = qr[1]
-    par = [-(3 * x * t / 2), 
-           -(3 * t / 2), 
-           -(5 * x * t / 2), 
-           -(3 * t / 2)]
+    par = [-(3 * x * t / 2), -(3 * t / 2), -(5 * x * t / 2), -(3 * t / 2)]
 
     circuito.ry(d * par[0], qr1)
     circuito.rz(d * par[1], qr1)
@@ -331,17 +356,13 @@ def ciclo2Placchette(circuito, qr, t, x, nCx, c, d):
 
 
 def ciclo3Placchette(circuito, qr, t, x, nCx, c, d):
-    par = [-(3 * t / 4), 
-           -(3 * t / 2), 
-           -(9 * x * t / 4), 
-           -(3 * x * t / 4),
-           -(x * t / 4)]
+    par = [-(3 * t / 4), -(3 * t / 2), -(9 * x * t / 4), -(3 * x * t / 4), -(x * t / 4)]
 
     vi = [0, 1, 2]
     vj = [1, 2, 0]
     vk = [2, 0, 1]
     for n in range(len(vi)):
-        circuito.rz(d * par[1], qr[vi[n]]) ###
+        circuito.rz(d * par[1], qr[vi[n]])  ###
         circuito.ry(d * par[2], qr[vi[n]])
 
         gruppoCx(circuito, qr[vi[n]], qr[vj[n]], nCx)
@@ -352,7 +373,7 @@ def ciclo3Placchette(circuito, qr, t, x, nCx, c, d):
         gruppoCx(circuito, qr[vi[n]], qr[vj[n]], nCx)
         circuito.ry(d * par[3], qr[vj[n]])
         gruppoCx(circuito, qr[vk[n]], qr[vj[n]], nCx)
-    
+
     for n in range(len(vi) - 1, -1, -1):
         gruppoCx(circuito, qr[vk[n]], qr[vj[n]], nCx)
         circuito.ry(c * par[3], qr[vj[n]])
@@ -369,8 +390,10 @@ def ciclo3Placchette(circuito, qr, t, x, nCx, c, d):
 
 def passoGenerico(circuito, qr, t, x, nCx, a, b):
     if len(a) != len(b):
-        raise Exception("passoGenerico(): i coefficienti passati non corrispondono", a, b)
-    
+        raise Exception(
+            "passoGenerico(): i coefficienti passati non corrispondono", a, b
+        )
+
     c = [a[0]]
     d = [b[0] - a[0]]
     for n in range(1, len(a)):
@@ -400,15 +423,15 @@ def passoBlanesMoan(circuito, qr, t, x, nCx):
     a3 = 1 - (2 * sum(a))
     a.append(a3)
     # a(q - i) = a(i), q = 6
-    a.append(a[2]) # a4
-    a.append(a[1]) # a5
+    a.append(a[2])  # a4
+    a.append(a[1])  # a5
 
     b2 = 0.5 - sum(b)
     b.append(b2)
     # b(q - 1 - i) = b(i)
-    b.append(b[2]) # b3
-    b.append(b[1]) # b4
-    b.append(b[0]) # b5
+    b.append(b[2])  # b3
+    b.append(b[1])  # b4
+    b.append(b[0])  # b5
 
     passoGenerico(circuito, qr, t, x, nCx, a, b)
 
@@ -419,18 +442,18 @@ def passoSuzuki(circuito, qr, t, x, nCx):
 
     a2 = 0.5 - sum(a)
     a.append(a2)
-    a.append(a[2]) # a3
-    a.append(a[1]) # a4
+    a.append(a[2])  # a3
+    a.append(a[1])  # a4
 
     b2 = 1 - (2 * sum(b))
     b.append(b2)
-    b.append(b[1]) # b3
-    b.append(b[0]) # b4
+    b.append(b[1])  # b3
+    b.append(b[0])  # b4
 
     passoGenerico(circuito, qr, t, x, nCx, a, b)
-    
 
-def evoluzione2Pl(circuito, registro, dt, x, passi, nCx, tipo = "Verlet"):
+
+def evoluzione2Pl(circuito, registro, dt, x, passi, nCx, tipo="Verlet"):
     if passi == 0:
         return
 
@@ -450,7 +473,7 @@ def evoluzione2Pl(circuito, registro, dt, x, passi, nCx, tipo = "Verlet"):
     circuito.sdg(registro)
 
 
-def evoluzione3Pl(circuito, registro, dt, x, passi, nCx, tipo = "Verlet"):
+def evoluzione3Pl(circuito, registro, dt, x, passi, nCx, tipo="Verlet"):
     if passi == 0:
         return
 
@@ -475,24 +498,29 @@ def evoluzionePerAutomitigazione(circuito, registro, dt, x, passiAvanti, nCx):
     circuito.s(registro)
     gruppoCx(circuito, registro[1], registro[0], nCx)
     for k in range(passiAvanti):
-        passoBlanesMoan(circuito, registro,  dt, x, nCx)
-        #passoVerlet(circuito, registro,  dt, x, nCx)
+        passoBlanesMoan(circuito, registro, dt, x, nCx)
+        # passoVerlet(circuito, registro,  dt, x, nCx)
     for k in range(passiAvanti):
         passoBlanesMoan(circuito, registro, -dt, x, nCx)
-        #passoVerlet(circuito, registro, -dt, x, nCx)
+        # passoVerlet(circuito, registro, -dt, x, nCx)
     gruppoCx(circuito, registro[1], registro[0], nCx)
     circuito.sdg(registro)
 
 
 #### Evoluzione hamiltoniana esatta
 
-def evoluzioneHamiltoniana(statoIniziale, autovalori, matriceAutovettori, matriceAutovettoriInversa, t):
+
+def evoluzioneHamiltoniana(
+    statoIniziale, autovalori, matriceAutovettori, matriceAutovettoriInversa, t
+):
     dim = len(autovalori)
 
-    matriceEvDiagonale = np.eye(N = dim, dtype = np.cdouble)
+    matriceEvDiagonale = np.eye(N=dim, dtype=np.cdouble)
     for n in range(dim):
-        matriceEvDiagonale[n][n] = matriceEvDiagonale[n][n] * np.e**(-1j * autovalori[n] * t)
-    
+        matriceEvDiagonale[n][n] = matriceEvDiagonale[n][n] * np.e ** (
+            -1j * autovalori[n] * t
+        )
+
     statoEvoluto = np.matmul(matriceAutovettori, matriceEvDiagonale)
     statoEvoluto = np.matmul(statoEvoluto, matriceAutovettoriInversa)
     statoEvoluto = np.matmul(statoEvoluto, statoIniziale)
@@ -507,10 +535,13 @@ def evoluzioneTemporaleStato(statoIniziale, H, tempi):
     autovalori, matriceAutovettori = np.linalg.eigh(H)
     matriceAutovettoriInversa = np.linalg.inv(matriceAutovettori)
     for t in tempi:
-        stato = evoluzioneHamiltoniana(statoIniziale, autovalori, matriceAutovettori, matriceAutovettoriInversa, t)
+        stato = evoluzioneHamiltoniana(
+            statoIniziale, autovalori, matriceAutovettori, matriceAutovettoriInversa, t
+        )
         vettoriStato.append(stato)
 
     return vettoriStato
+
 
 #### Test evoluzione hamiltoniana
 # statoIniziale = [0, 1, 0, 0]
@@ -532,7 +563,7 @@ def evoluzioneTemporaleStato(statoIniziale, H, tempi):
 # for t in ascisse:
 #     stato = evoluzioneHamiltoniana(statoIniziale, autovalori, matriceAutovettori, matriceAutovettoriInversa, t)
 #     stato = eliminaFaseGlobale(stato, 0)
-    
+
 #     for m in range(len(statoIniziale)):
 #         prob[m].append(abs(stato[m]) ** 2)
 #         partiReali[m].append(np.real(stato[m]))
@@ -545,16 +576,18 @@ def evoluzioneTemporaleStato(statoIniziale, H, tempi):
 
 #### Zero Noise Extrapolation
 
+
 def ZNE(misure):
     itZNE = len(misure)
     if itZNE == 1:
         return misure[0]
-    
-    ascisse =  [((2 * m) + 1) for m in range(itZNE)]
+
+    ascisse = [((2 * m) + 1) for m in range(itZNE)]
     ordinate = misure
-    retta = np.polynomial.Polynomial.fit(ascisse, ordinate, deg = 1)
+    retta = np.polynomial.Polynomial.fit(ascisse, ordinate, deg=1)
     misuraZNE = retta.convert().coef[0]
     return misuraZNE
+
 
 # vettore[k][n][i]:
 # k: indice stato
@@ -569,8 +602,9 @@ def ZNEMisureAccorpate(vettore):
         for n in range(nPunti):
             mis = ZNE(vettore[k][n])
             res[k].append(mis)
-    
+
     return res
+
 
 #### Test ZN
 # itZN = 3
@@ -584,6 +618,7 @@ def ZNEMisureAccorpate(vettore):
 
 #### Auto mitigazione
 
+
 def automitigazione(misuraFisica, misuraMitigante, probAttesa, nStati):
     rumore = 1 / nStati
     soglia = 0.01
@@ -594,19 +629,32 @@ def automitigazione(misuraFisica, misuraMitigante, probAttesa, nStati):
     probFisicaVera = rumore + (mF * pA / mM)
 
     if probFisicaVera < 0 and probFisicaVera > -soglia:
-        print("automitigazione(): la probabilità calcolata è negativa sotto la soglia, e viene corretta", probFisicaVera)
+        print(
+            "automitigazione(): la probabilità calcolata è negativa sotto la soglia, e viene corretta",
+            probFisicaVera,
+        )
         probFisicaVera = 0
     elif probFisicaVera < -soglia:
-        print("automitigazione(): la probabilità calcolata è negativa oltre la soglia e viene scartata", probFisicaVera)
+        print(
+            "automitigazione(): la probabilità calcolata è negativa oltre la soglia e viene scartata",
+            probFisicaVera,
+        )
         return 0
     elif probFisicaVera > 1 + soglia:
-        print("automitigazione(): la probabilità calcolata è maggiore di uno e viene scartata", probFisicaVera)
+        print(
+            "automitigazione(): la probabilità calcolata è maggiore di uno e viene scartata",
+            probFisicaVera,
+        )
         return 0
     if abs(mM) < soglia:
-        print("automitigazione(): la misura mitigante è troppo vicina al rumore: automitigazione da scartare", probFisicaVera)
+        print(
+            "automitigazione(): la misura mitigante è troppo vicina al rumore: automitigazione da scartare",
+            probFisicaVera,
+        )
         return 0
 
     return probFisicaVera
+
 
 # vettoreMis[k][n], vettoreAuto[k][nMit], probAttese[k]
 # k: indice stato
@@ -625,7 +673,9 @@ def automitigazioneMisureAccorpate(vettoreMis, vettoreAuto, probAttese):
             probMisurataMitigazione = vettoreAuto[k][nMit]
             probVeraMitigazione = probAttese[k]
 
-            misuraMit = automitigazione(probMisurataFisica, probMisurataMitigazione, probVeraMitigazione, nStati)
+            misuraMit = automitigazione(
+                probMisurataFisica, probMisurataMitigazione, probVeraMitigazione, nStati
+            )
             misureMitigate[k].append(misuraMit)
-    
+
     return misureMitigate

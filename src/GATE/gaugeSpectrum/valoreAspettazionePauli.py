@@ -1,11 +1,8 @@
 import numpy as np
-import time
-import matplotlib.pyplot as plt
-import moduliHR as simCl
-from qiskit import QuantumRegister, QuantumCircuit, ClassicalRegister
 from qiskit.quantum_info import SparsePauliOp
 from qiskit.providers.basicaer import QasmSimulatorPy
 from qiskit import transpile
+
 
 def applicaGates(stringaPauli, circuito):
     qr = circuito.qubits
@@ -16,30 +13,32 @@ def applicaGates(stringaPauli, circuito):
 
         match s:
             case "I":
-                #print("I", i, ": non si fa niente", sep = "")
-                continue    
+                # print("I", i, ": non si fa niente", sep = "")
+                continue
             case "X":
                 circuito.h(qr[i])
                 circuito.measure(qr[i], cr[i])
-                #print("X", i, ": si applica H al qubit ", i, " e lo si misura", sep = "")
+                # print("X", i, ": si applica H al qubit ", i, " e lo si misura", sep = "")
             case "Y":
                 circuito.sdg(qr[i])
                 circuito.h(qr[i])
                 circuito.measure(qr[i], cr[i])
-                #print("Y", i, ": si applica HS+ al qubit ", i, " e lo si misura",  sep = "")
+                # print("Y", i, ": si applica HS+ al qubit ", i, " e lo si misura",  sep = "")
             case "Z":
                 circuito.measure(qr[i], cr[i])
-                #print("Z", i, ": si misura il qubit ", i, sep = "")
+                # print("Z", i, ": si misura il qubit ", i, sep = "")
             case _:
                 raise Exception("Gate non riconosciuto", s)
+
 
 def contaUno(stringa):
     nUno = 0
     for c in stringa:
         if c == "1":
             nUno += 1
-    
+
     return nUno
+
 
 def stringaPauliValeI(stringa):
     for s in stringa:
@@ -47,28 +46,29 @@ def stringaPauliValeI(stringa):
             return False
     return True
 
+
 def restringiOperatorePauli(operatore):
     opInLista = operatore.to_list()
     operatoreRistretto = []
 
     while len(opInLista) > 0:
         stringa = opInLista[0][0]
-        #print("Stringa trovata:", stringa)
+        # print("Stringa trovata:", stringa)
         coefficiente = 0
 
         i = 0
         while i < len(opInLista):
-            #print(i)
+            # print(i)
             if stringa == opInLista[i][0]:
                 termine = opInLista.pop(i)
                 coefficiente += termine[1]
-                #print("Trovato un termine:", termine, i)
+                # print("Trovato un termine:", termine, i)
                 continue
             i += 1
-        
+
         soglia = 0.00001
         if abs(coefficiente) < soglia:
-            #print("Stringa scartata:", stringa, coefficiente)
+            # print("Stringa scartata:", stringa, coefficiente)
             continue
 
         operatoreRistretto.append(tuple([stringa, coefficiente]))
@@ -76,19 +76,23 @@ def restringiOperatorePauli(operatore):
     operatoreRistretto = SparsePauliOp.from_list(operatoreRistretto)
     return operatoreRistretto
 
+
 def valoreAspettazioneStringaPauliDaConteggi(conteggi):
     valore = 0
     for s, c in conteggi.items():
-        segno = (-1)**(contaUno(s))
+        segno = (-1) ** (contaUno(s))
         valore += segno * c
-    
+
     return valore
 
-def valoreAspettazioneOp(operatore, circuitoIniziale, backend = None):
+
+def valoreAspettazioneOp(operatore, circuitoIniziale, backend=None):
     gatePauli = operatore.to_list()
     if backend is None:
         backend = QasmSimulatorPy()
-    circuiti = [circuitoIniziale.copy(name = "circ_" + str(i)) for i in range(len(gatePauli))]
+    circuiti = [
+        circuitoIniziale.copy(name="circ_" + str(i)) for i in range(len(gatePauli))
+    ]
 
     for i in range(len(gatePauli)):
         stringa = gatePauli[i][0]
@@ -100,8 +104,8 @@ def valoreAspettazioneOp(operatore, circuitoIniziale, backend = None):
         circuitoTradotto = transpile(circuito, backend)
         circuiti[i] = circuitoTradotto
 
-    ripetizioni = 10000 #100
-    res = backend.run(circuiti, shots = ripetizioni).result()
+    ripetizioni = 10000  # 100
+    res = backend.run(circuiti, shots=ripetizioni).result()
 
     valoreAspettazione = 0
     for i in range(len(gatePauli)):
@@ -109,16 +113,18 @@ def valoreAspettazioneOp(operatore, circuitoIniziale, backend = None):
         conteggi = res.get_counts(circuiti[i])
         v = valoreAspettazioneStringaPauliDaConteggi(conteggi)
         valoreAspettazione += coefficiente * v / ripetizioni
-    
+
     return valoreAspettazione
 
-def mediaVarianzaOp(operatore, circuitoIniziale, backend = None):
+
+def mediaVarianzaOp(operatore, circuitoIniziale, backend=None):
     operatoreQuadro = operatore.dot(operatore)
     operatoreQuadro = restringiOperatorePauli(operatoreQuadro)
     media = valoreAspettazioneOp(operatore, circuitoIniziale, backend)
     varianza = valoreAspettazioneOp(operatoreQuadro, circuitoIniziale, backend)
     varianza = varianza - (media**2)
     return [np.real(media), np.real(varianza)]
+
 
 # # 100 ripetizioni in circa 1 minuto
 # tI = time.time()
