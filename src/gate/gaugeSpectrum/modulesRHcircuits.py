@@ -4,9 +4,9 @@ from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.providers.fake_provider import FakeLagos
 from qiskit_aer.primitives import Estimator as AerEstimator
 from qiskit_aer.noise import NoiseModel
-import moduliHR as simCl
-from valoreAspettazionePauli import valoreAspettazioneOp as valoreAspPauli
-from valoreAspettazionePauli import mediaVarianzaOp as misuraValoreMedioVarianza
+import modulesRH as simCl
+from expectationPauli import valoreAspettazioneOp as valoreAspPauli
+from expectationPauli import mediaVarianzaOp as misuraValoreMedioVarianza
 
 
 #### Con circuiti quantistici

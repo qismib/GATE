@@ -51,7 +51,7 @@ _nChiamate_ = 0
 _nDuplicati_ = 0
 
 
-# La varianza è molto veloce ma procude un bias troppo grande
+# La varianza è molto veloce ma produce un bias troppo grande
 # perchè i dati vengono distribuiti con lunghe code. La stima è
 # a 6 dev std dal valore vero. Anche la media non torna
 def funzioneCosto(entrate, hamiltoniana, statiInferiori=[], soppressione=20):
