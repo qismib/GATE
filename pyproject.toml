@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "gate"
+name = "GATE"
 version = "0.1.0"
 description = "Gaps Analysis via Time Evolution"
 authors = ["Stefano Grippo"]
