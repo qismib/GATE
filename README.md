@@ -12,16 +12,16 @@ The graphs generated with this code have been included in the thesis "On the spe
 
 - `src/GATE/gaugeSpectrum/`: The scripts for the eigenstates estimation.
 	- `vqeMP.py`: finds the eigenstates by minimizing the variance of the states with respect to a given Hamiltonian (see ["Variational quantum eigensolvers by variance minimization"](https://arxiv.org/abs/2006.15781)). Set `d` to `4` for the 2-plaquette simulation, or to `8` for the 3-plaquette case;
-	- `analisiDati.py`: generates visual information about the estimated eigenvectors for the 2-plaquette system, like their superposition with the true eigenvectors and an estimate of the eigenvalues of the Hamiltonian. The pictures are then put in `data/misureAutovaloriMPQ/`;
-	- `analisiDati3PL.py`: the same as `analisiDati.py` for the 3-plaquette system;
-	- `moduliHR.py`, `moduliHRCircuiti.py`, `valoreApettazionePauli.py`: contain useful functions;
+	- `dataAnalysis.py`: generates visual information about the estimated eigenvectors for the 2-plaquette system, like their superposition with the true eigenvectors and an estimate of the eigenvalues of the Hamiltonian. The pictures are then put in `data/misureAutovaloriMPQ/`;
+	- `dataAnalysis3PL.py`: the same as `analisiDati.py` for the 3-plaquette system;
+	- `modulesRH.py`, `modulesRHcircuits.py`, `expectationPauli.py`: contain useful functions;
 	- `backupMP.py`: saves the eigenstates during the execution of the VQE.
 
 - `src/GATE/plaquettesEvolution/`: The scripts for the time evolution.
-	- `Evoluzione2Pl.py`: outputs the graphs of the time evolution of the estimated eigenvectors for the 2-plaquette system. The pictures are saved in `data/frequenze2PL`;
-	- `Evoluzione3Pl.py`: the same as `Evoluzione2Pl.py` for the 3-plaquette system;
-	- `evConErrori.py`: outputs the graphs of a time evolution and its DFT when quantum fluctuations are taken into account. The pictures are saved in `data/errori`;
-	- `analisiFrequenze.py`: generates the graphs of the DFT of the time evolution of the eigenvectors. Then it estimates the energy gaps from the peaks. Set `nPlacchette` to `2` or `3` to choose the number of plaquettes of the system.
+	- `evolution2Pl.py`: outputs the graphs of the time evolution of the estimated eigenvectors for the 2-plaquette system. The pictures are saved in `data/frequenze2PL`;
+	- `evolution3Pl.py`: the same as `Evoluzione2Pl.py` for the 3-plaquette system;
+	- `evWithErrors.py`: outputs the graphs of a time evolution and its DFT when quantum fluctuations are taken into account. The pictures are saved in `data/errori`;
+	- `frequenciesAnalysis.py`: generates the graphs of the DFT of the time evolution of the eigenvectors. Then it estimates the energy gaps from the peaks. Set `nPlacchette` to `2` or `3` to choose the number of plaquettes of the system.
 
 - `LICENSE`: Project license.
 - `README.MD`: This file.

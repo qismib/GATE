@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from valoreAspettazionePauli import valoreAspettazioneOp
+from expectationPauli import valoreAspettazioneOp
 from qiskit.quantum_info import SparsePauliOp
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
@@ -9,7 +9,7 @@ DATA_PATH = "../../../data"
 
 d = 8
 x = 1.5
-leggiFile = False
+leggiFile = True
 metodi = ["VVQE"]
 
 
@@ -125,9 +125,9 @@ H = HQ.to_matrix()
 autovalori, autovettori = np.linalg.eigh(H)
 autovettori = np.transpose(autovettori)
 
-percorsoFile = f"{DATA_PATH}/misureAutovaloriMP/"
+percorsoFile = f"{DATA_PATH}/eigenvectorsMP/"
 if multiprocessing:
-    percorsoFile = f"{DATA_PATH}/misureAutovaloriMPQ/"
+    percorsoFile = f"{DATA_PATH}/eigenvectorsMPQ/"
 
 print(d)
 rng = np.random.default_rng()

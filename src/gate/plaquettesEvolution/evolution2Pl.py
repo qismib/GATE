@@ -1,4 +1,4 @@
-import moduliEvoluzionePlacchette as moduli
+import modulesEvolution as moduli
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -54,7 +54,7 @@ for s in range(1, nStati):
     print(vIniziale)
 
     ascisse = [(n * dt) for n in range(int(minP * nPunti), nPunti)]
-    percorsoFile = f"{DATA_PATH}/frequenze2PL/"
+    percorsoFile = f"{DATA_PATH}/frequencies2PL/"
     prefissoMisure = percorsoFile + "prob2P_" + str(s)
 
     if leggiDaFile:

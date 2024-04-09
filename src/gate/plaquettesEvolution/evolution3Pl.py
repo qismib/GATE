@@ -1,4 +1,4 @@
-import moduliEvoluzionePlacchette as moduli
+import modulesEvolution as moduli
 import matplotlib.pyplot as plt
 import numpy as np
 from qiskit import QuantumRegister, ClassicalRegister, QuantumCircuit
@@ -149,7 +149,7 @@ for s in range(1, nStati):
     print(vIniziale)
 
     ascisse = [(n * dt) for n in range(int(minP * nPunti), nPunti)]
-    percorsoFile = f"{DATA_PATH}/frequenze3PL/"
+    percorsoFile = f"{DATA_PATH}/frequencies3PL/"
     prefissoMisure = percorsoFile + "prob3P_" + str(s)
 
     if leggiDaFile:

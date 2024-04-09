@@ -1,4 +1,4 @@
-import moduliEvoluzionePlacchette as moduli
+import modulesEvolution as moduli
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +12,7 @@ misuraUnQubit = True
 
 nStati = 4
 attesi = [-3.06270952, 2.82790849, 3.0, 6.23480103]
-percorsoFile = f"{DATA_PATH}/frequenze2PL/"
+percorsoFile = f"{DATA_PATH}/frequencies2PL/"
 prefissoMisure = "prob2P_"
 
 if nPlacchette == 3:
@@ -27,7 +27,7 @@ if nPlacchette == 3:
         5.427050983124841,
         8.590269491424971,
     ]
-    percorsoFile = f"{DATA_PATH}/frequenze3PL/"
+    percorsoFile = f"{DATA_PATH}/frequencies3PL/"
     prefissoMisure = "prob3P_"
 
 gapAttesi = []

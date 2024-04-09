@@ -1,6 +1,6 @@
 import numpy as np
-import moduliHR as moduli
-import moduliHRcircuiti as simQ
+import modulesRH as moduli
+import modulesRHcircuits as simQ
 from qiskit.quantum_info import SparsePauliOp
 import multiprocessing as mp
 import time
@@ -146,9 +146,9 @@ print(H)
 autovalori, autovettori = np.linalg.eigh(H)
 autovettori = np.transpose(autovettori)
 
-percorsoFile = "data/misureAutovaloriMP/"
+percorsoFile = "../../../data/eigenvectorsMP/"
 if simulazioneQuantistica:
-    percorsoFile = "data/misureAutovaloriMPQ/"
+    percorsoFile = "../../../data/eigenvectorsMPQ/"
 nomeFile = percorsoFile + "attesi_" + str(d) + ".txt"
 file = open(nomeFile, "w")
 for a in autovalori:

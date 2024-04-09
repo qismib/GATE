@@ -1,5 +1,5 @@
 Valore atteso: 8.590269491424971
-Esecuzioni circuiti:5
+Esecuzioni circuiti:30
 Media misurata: 8.57328
 Deviazione standard: 0.004143184463670095
 Distanza in deviazioni standard: 4.100587742096593

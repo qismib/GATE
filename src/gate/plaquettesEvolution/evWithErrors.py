@@ -1,4 +1,4 @@
-import moduliEvoluzionePlacchette as moduli
+import modulesEvolution as moduli
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -115,7 +115,7 @@ for s in range(1, 2):
             ordinateProbPrecise[0].append(somma0)
             ordinateProbPrecise[1].append(somma1)
 
-        percorsoFile = f"{DATA_PATH}/errori/"
+        percorsoFile = f"{DATA_PATH}/errors/"
         if not leggiMisureDaFile:
             #### Simulazione esatta
 
