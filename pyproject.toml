@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "gate"
+version = "0.1.0"
+description = "Gaps Analysis via Time Evolution"
+authors = ["Stefano Grippo"]
+license = "Apache License 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+numpy = "^1.26.4"
+matplotlib = "^3.8.4"
+noisyopt = "^0.2.2"
+qiskit = {extras = ["visualization"], version = "^1.0.2"}
+scipy = "^1.13.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
